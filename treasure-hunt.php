@@ -28,16 +28,17 @@ $treasure = $treasureArr[rand(0, 15)];
 $arr[$treasure[0]][$treasure[1]] = "O";
 // Symbolize starting point with X
 $arr[$startPosition[0]][$startPosition[1]] = "X";
+$navigationArr = [];
 
 // Drawing map before find treasure
 printPath($arr);
 
 // Logic to find treasure
 findPath($arr, $startPosition, $treasure);
-
 echo "\n";
 // Drawing map after find treasure
 printPath($arr);
+groupingArr();
 
 function printPath($arr)
 {
@@ -51,6 +52,36 @@ function printPath($arr)
     }
     echo "\n";
 }
+function groupingArr()
+{
+    global $navigationArr;
+    $result = [];
+    $carry = [array_shift($navigationArr) => 1];
+     
+    foreach ($navigationArr as $value) {
+        if (isset($carry[$value])) {
+            ++$carry[$value];
+        } else {
+            $result[] = $carry;
+            $carry = [$value => 1];
+        }
+    }
+    $result[] = $carry;
+    foreach($result as $value) {
+        foreach($value as $key => $val) {
+            if ($val > 1){
+                echo $key ." ". $val . " step(s) \n";
+            }else{
+                echo $key ." ". $val . " step \n";
+            }
+        }
+    }
+
+}
+function markPath(&$arr, $lastPosition)
+{
+    $arr[$lastPosition[0]][$lastPosition[1]] = "$";
+}
 function findPath(&$arr, $startPosition, $treasure)
 {
     $found = false;
@@ -62,9 +93,8 @@ function findPath(&$arr, $startPosition, $treasure)
             break;
         }
         if ($firstStep) { // Check if it is the first step
-            $lastPosition = [$lastPosition[0] - 1, $lastPosition[1]]; // First step must be up
-            $arr[$lastPosition[0]][$lastPosition[1]] = "$";
-            echo "UP First\n";
+            $lastPosition = goUp($lastPosition); // First step must be up
+            markPath($arr, $lastPosition);
             $firstStep = false;
             continue;
         }
@@ -73,38 +103,29 @@ function findPath(&$arr, $startPosition, $treasure)
         // If the treasure is located above the first step then go to up path 
         if ($treasure[0] < $startPosition[0] - 1) {
             if (checkUp($arr, $lastPosition) != "#") { // Check Path Up
-                $lastPosition = [$lastPosition[0] - 1, $lastPosition[1]];
-                $arr[$lastPosition[0]][$lastPosition[1]] = "$";
-                echo "UP \n";
+                $lastPosition = goUp($lastPosition);
             } else {
                 if (checkRight($arr, $lastPosition) != "#") { // Check Path Right
-                    $lastPosition = [$lastPosition[0], $lastPosition[1] + 1];
-                    $arr[$lastPosition[0]][$lastPosition[1]] = "$";
-                    echo "RIGHT \n";
+                    $lastPosition = goRight($lastPosition);
                 } else {
                     if (checkDown($arr, $lastPosition) != "#") { // Do Down
-                        $lastPosition = [$lastPosition[0] + 1, $lastPosition[1]];
-                        $arr[$lastPosition[0]][$lastPosition[1]] = "$";
-                        echo "DOWN \n";
+                        $lastPosition = goDown($lastPosition);
                     }
                 }
             }
-        } 
-        
+        }
+
         // If the treasure is located below the first step then go to right path 
         else {
             if (checkRight($arr, $lastPosition) != "#") { // Do Right
-                $lastPosition = [$lastPosition[0], $lastPosition[1] + 1];
-                $arr[$lastPosition[0]][$lastPosition[1]] = "$";
-                echo "RIGHT \n";
+                $lastPosition = goRight($lastPosition);
             } else {
                 if (checkDown($arr, $lastPosition) != "#") { // Do Down
-                    $lastPosition = [$lastPosition[0] + 1, $lastPosition[1]];
-                    $arr[$lastPosition[0]][$lastPosition[1]] = "$";
-                    echo "DOWN \n";
+                    $lastPosition = goDown($lastPosition);
                 }
             }
         }
+        markPath($arr, $lastPosition);
     }
 }
 
@@ -138,16 +159,38 @@ function checkDown($arr, $lastPosition)
     }
 }
 
-function checkTreasure($arr, $lastPosition)
+function checkTreasure(&$arr, $lastPosition)
 {
-
     if (checkUp($arr, $lastPosition) == "O") {
-        return true;
+        $lastPosition = goUp($lastPosition);
     } else if (checkRight($arr, $lastPosition) == "O") {
-        return true;
+        $lastPosition = goRight($lastPosition);
     } else if (checkDown($arr, $lastPosition) == "O") {
-        return true;
+        $lastPosition = goDown($lastPosition);
     } else {
         return false;
     }
+    $arr[$lastPosition[0]][$lastPosition[1]] = "$";
+    return true;
+}
+
+function goUp($lastPosition)
+{
+    global $navigationArr;
+    array_push($navigationArr, "Up");
+    return [$lastPosition[0] - 1, $lastPosition[1]];
+}
+
+function goRight($lastPosition)
+{
+    global $navigationArr;
+    array_push($navigationArr, "Right");
+    return [$lastPosition[0], $lastPosition[1] + 1];
+}
+
+function goDown($lastPosition)
+{
+    global $navigationArr;
+    array_push($navigationArr, "Down");
+    return [$lastPosition[0] + 1, $lastPosition[1]];
 }
