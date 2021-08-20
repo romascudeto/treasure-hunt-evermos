@@ -38,7 +38,7 @@ findPath($arr, $startPosition, $treasure);
 echo "\n";
 // Drawing map after find treasure
 printPath($arr);
-groupingArr();
+groupingPath();
 
 function printPath($arr)
 {
@@ -52,36 +52,7 @@ function printPath($arr)
     }
     echo "\n";
 }
-function groupingArr()
-{
-    global $navigationArr;
-    $result = [];
-    $carry = [array_shift($navigationArr) => 1];
-     
-    foreach ($navigationArr as $value) {
-        if (isset($carry[$value])) {
-            ++$carry[$value];
-        } else {
-            $result[] = $carry;
-            $carry = [$value => 1];
-        }
-    }
-    $result[] = $carry;
-    foreach($result as $value) {
-        foreach($value as $key => $val) {
-            if ($val > 1){
-                echo $key ." ". $val . " step(s) \n";
-            }else{
-                echo $key ." ". $val . " step \n";
-            }
-        }
-    }
 
-}
-function markPath(&$arr, $lastPosition)
-{
-    $arr[$lastPosition[0]][$lastPosition[1]] = "$";
-}
 function findPath(&$arr, $startPosition, $treasure)
 {
     $found = false;
@@ -194,3 +165,36 @@ function goDown($lastPosition)
     array_push($navigationArr, "Down");
     return [$lastPosition[0] + 1, $lastPosition[1]];
 }
+
+function groupingPath()
+{
+    global $navigationArr;
+    $result = [];
+    $carry = [array_shift($navigationArr) => 1];
+     
+    foreach ($navigationArr as $value) {
+        if (isset($carry[$value])) {
+            ++$carry[$value];
+        } else {
+            $result[] = $carry;
+            $carry = [$value => 1];
+        }
+    }
+    $result[] = $carry;
+    foreach($result as $value) {
+        foreach($value as $key => $val) {
+            if ($val > 1){
+                echo $key ." ". $val . " step(s) \n";
+            }else{
+                echo $key ." ". $val . " step \n";
+            }
+        }
+    }
+
+}
+
+function markPath(&$arr, $lastPosition)
+{
+    $arr[$lastPosition[0]][$lastPosition[1]] = "$";
+}
+
